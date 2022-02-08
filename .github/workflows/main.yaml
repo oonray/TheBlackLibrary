@@ -1,0 +1,63 @@
+name: blackhat docker
+
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          file: ./vpn/Dockerfile
+          push: true
+          tags: oonray/blackhat:latest
+
+  binaries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+
+      - run: mkdir -p artifacts
+      - run: sudo apt-get install -y python3 python3-dev gcc-mingw-w64-x86-64 gcc-mingw-w64-i686
+
+      - run: GOOS=windows GOARCH=amd64 go  build  -o artifacts/win64-OddProxy.exe OddProxy/main.go
+      - run: GOOS=windows GOARCH=386   go  build  -o artifacts/win32-OddProxy.exe OddProxy/main.go
+      - run: GOOS=linux   GOARCH=amd64 go  build  -o artifacts/lin64-OddProxy     OddProxy/main.go
+      - run: GOOS=linux   GOARCH=386   go  build  -o artifacts/lin32-OddProxy     OddProxy/main.go
+
+      - run: GOOS=windows GOARCH=amd64 go  build  -o artifacts/win64-Socks5.exe Socks5/Socks5.go
+      - run: GOOS=windows GOARCH=386   go  build  -o artifacts/win32-Socks5.exe Socks5/Socks5.go
+      - run: GOOS=linux   GOARCH=amd64 go  build  -o artifacts/lin64-Socks5     Socks5/Socks5.go
+      - run: GOOS=linux   GOARCH=386   go  build  -o artifacts/lin32-Socks5     Socks5/Socks5.go
+
+     #- run: CC=x86_64-w64-mingw32-gcc  GOOS=windows GOARCH=amd64  CGO_ENABLED=1  go  build  -o artifacts/win64-python.exe python/main.go
+     #- run: CC=i686-w64-mingw32-gcc    GOOS=windows GOARCH=386    CGO_ENABLED=1  go  build  -o artifacts/win32-python.exe python/main.go
+     - run: CC=gcc  GOOS=linux   GOARCH=amd64  CGO_ENABLED=1  go  build  -o artifacts/lin64-python     python/main.go
+     - run: CC=gcc    GOOS=linux   GOARCH=386    CGO_ENABLED=1  go  build  -o artifacts/lin32-python     python/main.go
+
+      - run: GOOS=windows GOARCH=amd64 go  build  -o artifacts/win64-TCPForwarder.exe TCPForwarder/main.go
+      - run: GOOS=windows GOARCH=386   go  build  -o artifacts/win32-TCPForwarder.exe TCPForwarder/main.go
+      - run: GOOS=linux   GOARCH=amd64 go  build  -o artifacts/lin64-TCPForwarder     TCPForwarder/main.go
+      - run: GOOS=linux   GOARCH=386   go  build  -o artifacts/lin32-TCPForwarder     TCPForwarder/main.go
+
+      - uses: ncipollo/release-action@v1
+        with:
+          name: latest
+          tag: 1.0
+          artifacts: artifacts/*
+          token: ${{ secrets.GITHUB_TOKEN }}
