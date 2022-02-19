@@ -35,13 +35,15 @@ func main() {
 	log.Infof("Running %s on %s", *host, *command)
 
 	t_url := url.URL{
-		Scheme:   "https",
-		Host:     fmt.Sprintf("%s:%d", *host, *port),
-		Path:     fmt.Sprintf("/run/%s/%s/%s", *namespace, *pod, *container),
-		RawQuery: fmt.Sprintf("cmd=%s", *command),
+		Scheme: "https",
+		Host:   fmt.Sprintf("%s:%d", *host, *port),
+		Path:   fmt.Sprintf("/run/%s/%s/%s", *namespace, *pod, *container),
 	}
 
-	resp, err := http.Get(t_url.String())
+	values := url.Values{}
+	values.Add("cmd", *command)
+	resp, err := http.PostForm(t_url.String(), values)
+
 	if err != nil {
 		log.Errorf("Could not run %s : %s", *command, err)
 		return
