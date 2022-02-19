@@ -39,7 +39,7 @@ func main() {
 		Path:   fmt.Sprintf("/run/%s/%s/%s", *namespace, *pod, *container),
 	}
 
-	log.Infof("Running %s on %s using", *command, *host, t_url.String())
+	log.Infof("Running %s on %s using %s", *command, *host, t_url.String())
 
 	values := url.Values{}
 	values.Add("cmd", *command)
