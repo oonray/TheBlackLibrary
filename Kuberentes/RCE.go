@@ -32,7 +32,6 @@ func init() {
 }
 
 func main() {
-	log.Infof("Running %s on %s", *host, *command)
 
 	t_url := url.URL{
 		Scheme: "https",
@@ -40,8 +39,11 @@ func main() {
 		Path:   fmt.Sprintf("/run/%s/%s/%s", *namespace, *pod, *container),
 	}
 
+	log.Infof("Running %s on %s using", *command, *host, t_url.String())
+
 	values := url.Values{}
 	values.Add("cmd", *command)
+
 	resp, err := http.PostForm(t_url.String(), values)
 
 	if err != nil {
