@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 )
 
 var (
@@ -39,7 +40,7 @@ func main() {
 		Path:   fmt.Sprintf("/run/%s/%s/%s", *namespace, *pod, *container),
 	}
 
-	log.Infof("Running %s on %s using %s", *command, *host, t_url.String())
+	log.Errorf("Running %s on %s using %s", *command, *host, t_url.String())
 
 	values := url.Values{}
 	values.Add("cmd", *command)
@@ -57,5 +58,5 @@ func main() {
 		return
 	}
 
-	log.Infof("==== OUT ====\n\n %s \n\n ==== OUT ====\n", data)
+	fmt.Fprintf(os.Stdout, "%s", data)
 }
