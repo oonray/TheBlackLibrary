@@ -6,7 +6,7 @@ require (
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/sirupsen/logrus v1.8.1
 	github.com/things-go/go-socks5 v0.0.2
-	golang.org/x/crypto v0.0.0-20220208050332-20e1d8d225ab
+	golang.org/x/crypto v0.0.0-20220513210258-46612604a0f9
 )
 
 require (
