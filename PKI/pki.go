@@ -65,49 +65,26 @@ func (p *PKI) Write() error {
 	}
 
 	file := fmt.Sprintf("%s/cert.crt", p.folder)
-	_, err = os.Stat(file)
-	if err != nil {
-		_, err = os.Create(file)
-		if err != nil {
-			return err
-		}
-	}
-	crt, err := os.Open(file)
+	crt, err := os.Create(file)
 	if err != nil {
 		return err
 	}
 	pem.Encode(crt, &pem.Block{Type: "CERTIFICATE", Bytes: p.cert})
-	defer crt.Close()
 
 	file = fmt.Sprintf("%s/key.pem", p.folder)
-	_, err = os.Stat(file)
-	if err != nil {
-		_, err = os.Create(file)
-		if err != nil {
-			return err
-		}
-	}
-	key, err := os.Open(file)
+	key, err := os.Create(file)
 	if err != nil {
 		return err
 	}
-	defer key.Close()
-	pem.Encode(key, &pem.Block{Type: "PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(p.private)})
+	pem.Encode(key, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(p.private)})
 
 	file = fmt.Sprintf("%s/pub.pem", p.folder)
 	_, err = os.Stat(file)
-	if err != nil {
-		_, err = os.Create(file)
-		if err != nil {
-			return err
-		}
-	}
-	pub, err := os.Open(file)
+	pub, err := os.Create(file)
 	if err != nil {
 		return err
 	}
-	defer pub.Close()
 
-	pem.Encode(pub, &pem.Block{Type: "PUBLIC KEY", Bytes: x509.MarshalPKCS1PublicKey(p.public)})
+	pem.Encode(pub, &pem.Block{Type: "RSA PUBLIC KEY", Bytes: x509.MarshalPKCS1PublicKey(p.public)})
 	return nil
 }
