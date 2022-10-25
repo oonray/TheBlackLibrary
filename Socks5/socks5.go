@@ -6,8 +6,6 @@ import (
 	"fmt"
 	socks5 "github.com/armon/go-socks5"
 	logR "github.com/sirupsen/logrus"
-	"log"
-	"os"
 )
 
 var (
