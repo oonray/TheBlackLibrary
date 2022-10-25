@@ -4,8 +4,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	socks5 "github.com/armon/go-socks5"
 	logR "github.com/sirupsen/logrus"
-	"github.com/things-go/go-socks5"
 	"log"
 	"os"
 )
@@ -31,9 +31,11 @@ func main() {
 		return
 	}
 
-	server := socks5.NewServer(
-		socks5.WithLogger(socks5.NewLogger(log.New(os.Stdout, "socks5: ", log.LstdFlags))),
-	)
+	server, err := socks5.New(&socks5.Config{})
+	if err != nil {
+		logR.Error(err)
+		return
+	}
 
 	if err := server.ListenAndServe("tcp", fmt.Sprintf(":%s", *lp)); err != nil {
 		logR.Fatalf("%s", err)
