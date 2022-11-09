@@ -34,6 +34,11 @@ jobs:
       - run: GOOS=linux   GOARCH=amd64 go  build  -o artifacts/lin64-TCPForwarder     TCPForwarder/main.go
       - run: GOOS=linux   GOARCH=386   go  build  -o artifacts/lin32-TCPForwarder     TCPForwarder/main.go
 
+      - run: GOOS=windows GOARCH=amd64 go  build  -o artifacts/win64-dnsServer.exe DNS/main.go
+      - run: GOOS=windows GOARCH=386   go  build  -o artifacts/win32-dnsServer.exe DNS/main.go
+      - run: GOOS=linux   GOARCH=amd64 go  build  -o artifacts/lin64-dnsServer     DNS/main.go
+      - run: GOOS=linux   GOARCH=386   go  build  -o artifacts/lin32-dnsServer     DNS/main.go
+
       - uses: ncipollo/release-action@v1
         with:
           name: latest
