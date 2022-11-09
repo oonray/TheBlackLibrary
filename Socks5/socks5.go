@@ -38,6 +38,16 @@ func argparse() error {
 		return errors.New("Listen port must be declared")
 	}
 
+	return nil
+}
+
+func main() {
+	err := argparse()
+	if err != nil {
+		logR.Error(err)
+		return
+	}
+
 	if *reslv != "" {
 		conf.Resolver = DirectResolver{
 			Reslv: net.Resolver{
@@ -50,16 +60,6 @@ func argparse() error {
 				},
 			},
 		}
-	}
-
-	return nil
-}
-
-func main() {
-	err := argparse()
-	if err != nil {
-		logR.Error(err)
-		return
 	}
 
 	server, err := socks5.New(&conf)
