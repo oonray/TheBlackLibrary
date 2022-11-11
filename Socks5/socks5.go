@@ -14,6 +14,7 @@ import (
 var (
 	lp    *string
 	reslv *string
+	conf  socks5.Config = socks5.Config{}
 )
 
 type DirectResolver struct {
