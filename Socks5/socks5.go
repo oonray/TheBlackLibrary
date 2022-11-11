@@ -13,9 +13,7 @@ import (
 
 var (
 	lp    *string
-	reslv *string
-	conf  socks5.Config = socks5.Config{}
-)
+	reslv *strin
 
 type DirectResolver struct {
 	Reslv net.Resolver
