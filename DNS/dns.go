@@ -37,7 +37,6 @@ func default_handler(w dns.ResponseWriter, req *dns.Msg) {
 	for _, data := range req.Question {
 		out, in := hsts.Hosts[strings.Trim(data.Name, ".")]
 		if in {
-			log.Printf("found %s", data.Name)
 			answer := dns.A{
 				Hdr: dns.RR_Header{
 					Name:   data.Name,
@@ -50,7 +49,6 @@ func default_handler(w dns.ResponseWriter, req *dns.Msg) {
 			a.Answer = append(a.Answer, &answer)
 		}
 		if !in {
-			log.Printf("not found %s", data.Name)
 			ip, err := net.ResolveIPAddr("ip", data.Name)
 			if err == nil {
 				answer := dns.A{
