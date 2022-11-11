@@ -13,7 +13,7 @@ import (
 
 var (
 	lp    *string
-	reslv *strin
+	reslv *string
 )
 
 type DirectResolver struct {
