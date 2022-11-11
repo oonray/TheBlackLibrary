@@ -1,4 +1,4 @@
-module DNS
+module github.com/oonray/TheBlackLibrary/DNS
 
 go 1.17
 
