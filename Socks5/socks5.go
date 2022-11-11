@@ -14,6 +14,7 @@ import (
 var (
 	lp    *string
 	reslv *strin
+)
 
 type DirectResolver struct {
 	Reslv net.Resolver
