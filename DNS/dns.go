@@ -14,6 +14,7 @@ import (
 var (
 	hsts      Hosts = Hosts{Hosts: map[string]string{}}
 	hsts_lock sync.RWMutex
+	dnsserver string
 	host      string
 	port      string
 	udp       bool
@@ -56,7 +57,7 @@ func default_handler(w dns.ResponseWriter, req *dns.Msg) {
 	hsts_lock.RUnlock()
 
 	if !in {
-		resp, err := dns.Exchange(req, "8.8.8.8:53")
+		resp, err := dns.Exchange(req, dnsserver)
 		if err != nil {
 			dns.HandleFailed(w, req)
 			return
@@ -75,6 +76,7 @@ func default_handler(w dns.ResponseWriter, req *dns.Msg) {
 func init() {
 	flag.StringVar(&host, "H", "127.0.0.1", "The host to bind the server to")
 	flag.StringVar(&port, "P", "53", "The port to bind the server to")
+	flag.StringVar(&dnsserver, "DNS", "8.8.8.8:53", "The upstream DNS server")
 	flag.Parse()
 }
 
