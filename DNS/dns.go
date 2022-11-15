@@ -8,14 +8,16 @@ import (
 	"log"
 	"net"
 	"strings"
+	"sync"
 )
 
 var (
-	hsts  Hosts = Hosts{Hosts: map[string]string{}}
-	host  string
-	port  string
-	udp   bool
-	proto string = "tcp"
+	hsts      Hosts = Hosts{Hosts: map[string]string{}}
+	hsts_lock sync.RWMutex
+	host      string
+	port      string
+	udp       bool
+	proto     string = "tcp"
 )
 
 type Hosts struct {
@@ -24,7 +26,6 @@ type Hosts struct {
 
 func (h *Hosts) Set(value string) error {
 	data := strings.Split(value, ":")
-	log.Printf("%v", data)
 	h.Hosts[data[0]] = data[1]
 	log.Printf("%v", h.Hosts)
 	return nil
@@ -32,39 +33,43 @@ func (h *Hosts) Set(value string) error {
 
 func default_handler(w dns.ResponseWriter, req *dns.Msg) {
 	var a dns.Msg = dns.Msg{}
+	var A dns.A = dns.A{
+		Hdr: dns.RR_Header{
+			Name:   req.Question[0].Name,
+			Rrtype: dns.TypeA,
+			Class:  dns.ClassINET,
+			Ttl:    0,
+		},
+	}
+
+	a.Answer = append(a.Answer, &A)
 	a.SetReply(req)
 
-	for _, data := range req.Question {
-		out, in := hsts.Hosts[strings.Trim(data.Name, ".")]
-		if in {
-			answer := dns.A{
-				Hdr: dns.RR_Header{
-					Name:   data.Name,
-					Rrtype: dns.TypeA,
-					Class:  dns.ClassINET,
-					Ttl:    0,
-				},
-				A: net.ParseIP(out).To4(),
-			}
-			a.Answer = append(a.Answer, &answer)
-		}
-		if !in {
-			ip, err := net.ResolveIPAddr("ip", data.Name)
-			if err == nil {
-				answer := dns.A{
-					Hdr: dns.RR_Header{
-						Name:   data.Name,
-						Rrtype: dns.TypeA,
-						Class:  dns.ClassINET,
-						Ttl:    0,
-					},
-					A: ip.IP,
-				}
-				a.Answer = append(a.Answer, &answer)
-			}
-		}
+	if len(req.Question) < 1 {
+		dns.HandleFailed(w, req)
 	}
-	w.WriteMsg(&a)
+
+	name := strings.Trim(req.Question[0].Name, ".")
+
+	hsts_lock.RLock()
+	out, in := hsts.Hosts[name]
+	hsts_lock.RUnlock()
+
+	if !in {
+		resp, err := dns.Exchange(req, "8.8.8.8:53")
+		if err != nil {
+			dns.HandleFailed(w, req)
+			return
+		}
+		a = *resp
+	} else {
+		A.A = net.ParseIP(out).To4()
+	}
+
+	if err := w.WriteMsg(&a); err != nil {
+		dns.HandleFailed(w, req)
+		return
+	}
 }
 
 func init() {
