@@ -33,44 +33,46 @@ func (h *Hosts) Set(value string) error {
 }
 
 func default_handler(w dns.ResponseWriter, req *dns.Msg) {
-	var a dns.Msg = dns.Msg{}
-	var A dns.A = dns.A{
-		Hdr: dns.RR_Header{
-			Name:   req.Question[0].Name,
-			Rrtype: dns.TypeA,
-			Class:  dns.ClassINET,
-			Ttl:    0,
-		},
-	}
+	go func() {
+		var a dns.Msg = dns.Msg{}
+		var A dns.A = dns.A{
+			Hdr: dns.RR_Header{
+				Name:   req.Question[0].Name,
+				Rrtype: dns.TypeA,
+				Class:  dns.ClassINET,
+				Ttl:    0,
+			},
+		}
 
-	a.Answer = append(a.Answer, &A)
-	a.SetReply(req)
+		a.Answer = append(a.Answer, &A)
+		a.SetReply(req)
 
-	if len(req.Question) < 1 {
-		dns.HandleFailed(w, req)
-	}
+		if len(req.Question) < 1 {
+			dns.HandleFailed(w, req)
+		}
 
-	name := strings.Trim(req.Question[0].Name, ".")
+		name := strings.Trim(req.Question[0].Name, ".")
 
-	hsts_lock.RLock()
-	out, in := hsts.Hosts[name]
-	hsts_lock.RUnlock()
+		hsts_lock.RLock()
+		out, in := hsts.Hosts[name]
+		hsts_lock.RUnlock()
 
-	if !in {
-		resp, err := dns.Exchange(req, dnsserver)
-		if err != nil {
+		if !in {
+			resp, err := dns.Exchange(req, dnsserver)
+			if err != nil {
+				dns.HandleFailed(w, req)
+				return
+			}
+			a = *resp
+		} else {
+			A.A = net.ParseIP(out).To4()
+		}
+
+		if err := w.WriteMsg(&a); err != nil {
 			dns.HandleFailed(w, req)
 			return
 		}
-		a = *resp
-	} else {
-		A.A = net.ParseIP(out).To4()
-	}
-
-	if err := w.WriteMsg(&a); err != nil {
-		dns.HandleFailed(w, req)
-		return
-	}
+	}()
 }
 
 func init() {
