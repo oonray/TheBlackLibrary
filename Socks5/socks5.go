@@ -12,16 +12,17 @@ import (
 )
 
 var (
-	lp    *string
-	reslv *string
-	conf  socks5.Config = socks5.Config{}
+	lp     *string
+	reslv  *string
+	conf   *socks5.Config = new(socks5.Config)
+	server *socks5.Server
 )
 
 type DirectResolver struct {
-	Reslv net.Resolver
+	Reslv *net.Resolver
 }
 
-func (d DirectResolver) Resolve(ctx context.Context, name string) (context.Context, net.IP, error) {
+func (d *DirectResolver) Resolve(ctx context.Context, name string) (context.Context, net.IP, error) {
 	addr, err := d.Reslv.LookupIP(ctx, "ip", name)
 	if err != nil {
 		return ctx, nil, err
@@ -42,18 +43,20 @@ func argparse() error {
 }
 
 func main() {
-	err := argparse()
+	var err error
+	err = argparse()
+
 	if err != nil {
 		logR.Error(err)
 		return
 	}
 
 	if *reslv != "" {
-		conf.Resolver = DirectResolver{
-			Reslv: net.Resolver{
+		conf.Resolver = &DirectResolver{
+			Reslv: &net.Resolver{
 				PreferGo: true,
 				Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-					d := net.Dialer{
+					d := &net.Dialer{
 						Timeout: time.Second * time.Duration(4),
 					}
 					return d.DialContext(ctx, network, *reslv)
@@ -62,7 +65,7 @@ func main() {
 		}
 	}
 
-	server, err := socks5.New(&conf)
+	server, err = socks5.New(conf)
 	if err != nil {
 		logR.Error(err)
 		return
