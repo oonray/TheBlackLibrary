@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/miekg/dns"
-	"log"
 	"net"
 	"strings"
 	"sync"
