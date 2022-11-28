@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	hsts      Hosts = Hosts{Hosts: map[string]string{}}
+	hsts      map[string]string = make(map[string]string)
 	hsts_lock sync.RWMutex
 	dnsserver string
 	host      string
@@ -20,17 +20,6 @@ var (
 	udp       bool
 	proto     string = "tcp"
 )
-
-type Hosts struct {
-	Hosts map[string]string
-}
-
-func (h *Hosts) Set(value string) error {
-	data := strings.Split(value, ":")
-	h.Hosts[data[0]] = data[1]
-	log.Printf("%v", h.Hosts)
-	return nil
-}
 
 func default_handler(w dns.ResponseWriter, req *dns.Msg) {
 	go func() {
@@ -54,7 +43,7 @@ func default_handler(w dns.ResponseWriter, req *dns.Msg) {
 		name := strings.Trim(req.Question[0].Name, ".")
 
 		hsts_lock.RLock()
-		out, in := hsts.Hosts[name]
+		out, in := hsts[name]
 		hsts_lock.RUnlock()
 
 		if !in {
@@ -84,8 +73,10 @@ func init() {
 
 func main() {
 	for _, data := range flag.Args() {
-		hsts.Set(data)
+		dt := strings.Split(data, ":")
+		hsts[dt[0]] = dt[1]
 	}
+
 	dns.HandleFunc(".", default_handler)
-	log.Fatal(dns.ListenAndServe(fmt.Sprintf("%s:%s", host, port), "udp", nil))
+	dns.ListenAndServe(fmt.Sprintf("%s:%s", host, port), "udp", nil)
 }
