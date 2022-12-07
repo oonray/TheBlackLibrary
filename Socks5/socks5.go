@@ -71,7 +71,8 @@ func main() {
 		return
 	}
 
-	if err := server.ListenAndServe("tcp", fmt.Sprintf(":%s", *lp)); err != nil {
+	err = server.ListenAndServe("tcp", fmt.Sprintf(":%s", *lp))
+	if err != nil {
 		logR.Fatalf("%s", err)
 	}
 }
