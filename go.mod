@@ -4,11 +4,11 @@ go 1.17
 
 require (
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
+	github.com/krolaw/dhcp4 v0.0.0-20190909130307-a50d88189771
 	github.com/miekg/dns v1.1.50
 	github.com/sirupsen/logrus v1.8.1
 	golang.org/x/crypto v0.0.0-20220513210258-46612604a0f9
 )
-
 
 require (
 	github.com/stretchr/testify v1.7.0 // indirect
