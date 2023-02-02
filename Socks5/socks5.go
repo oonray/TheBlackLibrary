@@ -57,7 +57,7 @@ func main() {
 				PreferGo: true,
 				Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
 					d := &net.Dialer{
-						Timeout: time.Second * time.Duration(4),
+						Timeout: time.Microsecond * time.Duration(500),
 					}
 					return d.DialContext(ctx, network, *reslv)
 				},
