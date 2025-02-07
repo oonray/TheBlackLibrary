@@ -1,3 +1,3 @@
 module github.com/oonray/TheBlackLibrary/PKI
 
-go 1.17
+go 1.23.5

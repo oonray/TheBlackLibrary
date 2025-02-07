@@ -1,4 +1,4 @@
-package pki
+package github.com/oonray/TheBlackLibrary/pki
 
 import (
 	"crypto/rand"
